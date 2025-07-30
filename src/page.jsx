@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react'; // Menambahkan useState dan useEffect
 import Navbar from './components/Navbar';
-// Pastikan nama file gambar ini sesuai dengan yang ada di folder assets Anda
-import personImage from './assets/person.jpg'; 
+import personImage from './assets/person.jpg';
 
-// --- Komponen Ikon SVG untuk Skills dan Kontak ---
+// --- Komponen Ikon SVG (tidak berubah) ---
 const HtmlIcon = () => (<svg className="w-10 h-10 md:w-12 md:h-12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 3L5.77778 20.0899L12 22L18.2222 20.0899L20 3H4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>);
 const CssIcon = () => (<svg className="w-10 h-10 md:w-12 md:h-12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 3L5.77778 20.0899L12 22L18.2222 20.0899L20 3H4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M17 7H7.5L8 12H16L15.5 17L12 18L8.5 17L8.25 14.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>);
 const JsIcon = () => (<svg className="w-10 h-10 md:w-12 md:h-12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.5 21L12 18L6.5 21L5 3H19L17.5 21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M8.5 8H14.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M11.5 8V14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M11.5 12H9.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>);
@@ -15,6 +14,9 @@ const EmailIcon = () => (<svg className="w-8 h-8" viewBox="0 0 24 24" fill="none
 const ContactLink = ({ href, children }) => (<a href={href} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">{children}</a>);
 
 function Home() {
+    // State untuk link aktif sekarang dikelola di sini
+    const [activeLink, setActiveLink] = useState('Home');
+
     const skills = [
         { name: "HTML5", icon: <HtmlIcon /> },
         { name: "CSS3", icon: <CssIcon /> },
@@ -30,15 +32,37 @@ function Home() {
         { name: "Dasar-Dasar UI/UX", issuer: "Skilvul", year: "2023", image: "https://placehold.co/600x400/0f172a/38bdf8?text=Sertifikat+3" }
     ];
 
+    // useEffect untuk mendeteksi posisi scroll dan mengupdate link aktif
+    useEffect(() => {
+        const sections = document.querySelectorAll('section[id]');
+        
+        const handleScroll = () => {
+            const scrollY = window.pageYOffset;
+
+            sections.forEach(current => {
+                const sectionHeight = current.offsetHeight;
+                const sectionTop = current.offsetTop - 150; // Offset agar link aktif lebih cepat
+                let sectionId = current.getAttribute('id');
+                
+                if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
+                    const linkName = sectionId.charAt(0).toUpperCase() + sectionId.slice(1);
+                    setActiveLink(linkName);
+                }
+            });
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+
     return (
         <>
-            <Navbar/>
+            {/* Mengirim state dan fungsi update sebagai props ke Navbar */}
+            <Navbar activeLink={activeLink} setActiveLink={setActiveLink} />
             <main className="scroll-smooth bg-slate-900">
-                {/* PERBAIKAN 1: Menambahkan padding-top di mobile untuk memberi ruang bagi navbar */}
                 <section id='home' className="pt-24 md:pt-0">
-                    {/* PERBAIKAN 2: Menggunakan flex-col-reverse untuk membalik urutan di mobile */}
                     <div className="flex flex-col-reverse md:flex-row justify-between md:h-screen">
-                        {/* PERBAIKAN 3: Menyesuaikan padding vertikal di mobile */}
                         <div id='left-hero' className="relative w-full md:w-2/3 flex items-center justify-center overflow-hidden bg-slate-900 py-16 md:py-0">
                             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150vmax] h-[150vmax] bg-gradient-radial from-blue-900/30 via-slate-900 to-slate-900 rounded-full animate-spin-slow"></div>
                             <div className="relative z-10 flex flex-col items-center w-full text-center px-4">
@@ -56,7 +80,7 @@ function Home() {
                         <div id='right-hero' className="relative w-full md:w-1/3 h-96 md:h-full bg-cover bg-top md:bg-center" style={{ backgroundImage: `url(${personImage})` }}>
                             <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-slate-900 to-transparent"></div>
                             <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent"></div>
-                            <div className="md:hidden absolute inset-0 [background:radial-gradient(ellipse_at_center,_transparent_20%,_#0f172a)]"></div>
+                            <div className="md:hidden absolute inset-0 [background:radial-gradient(ellipse_at_center,_transparent_25%,_#0f172a)]"></div>
                         </div>
                     </div>
                 </section>
